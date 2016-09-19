@@ -42,19 +42,47 @@ class Cost():
 
 Party = namedtuple('Party', ['mul', 'isogeny', 'next_curve'])
 
-# Arithmetic in GF(p^2), in terms of number of ops in GF(p)
-A = Cost(a=2, mod=2)
-M = Cost(m=3, a=4, mod=2)
-S = Cost(m=2, a=3, mod=2)
-I = Cost(i=1, m=4, a=1, mod=2)
+# Arithmetic in GF(p^2), in terms of number of ops in GF(p).
+#
+# We use the following elementary operations:
+#
+# - i: inversion mod p of an integer of size log(p)
+# - m: multiplication of integers of size log(p)
+# - a: addition of integers of size log(p)
+# - mod: reduction mod p of integers of size 2log(p)
+#
+# Assuming -1 is not a square in GF(p), we have the following costs
+# for operations in GF(p^2)
+A = Cost(a=2)                   # Addition
+M = Cost(m=3, a=4, mod=2)       # Multiplication
+m = Cost(m=2, mod=2)            # Scalar multipliccation
+S = Cost(m=2, a=3, mod=2)       # Squaring
+I = Cost(i=1, m=4, a=1, mod=2)  # Inversion
 
 # DJP paper (original)
 
+double = 3*M + 2*S + 4*A
+triple = double + 4*M + 2*S + 4*A
+
 DJP = {
-    2: Party(3*M + 2*S, 2*M + S, Cost()),
-    3: Party(7*M + 4*S, 4*M + 2*S, Cost()),
-    4: Party(6*M + 4*S, 6*M + S, Cost()),
+    2: Party(double,
+                 2*M + S + A,
+                 I + 4*M + S + A),
+    3: Party(triple,
+                 4*M + 2*S + 2*A,
+                 I + 4*M +   S + 4*A + m),
+    4: Party(2*double,
+                 6*M + S + 7*A,
+                 double + 2*I + 6*M + 6*A + m),
 }
 
 # CLN paper (Microsoft)
-CLN = {}
+
+CLN = {
+    3: Party(triple + M,
+                 6*M + 2*S + 2*A,
+                 3*M + 3*S + 8*A),
+    4: Party(2*double + 2*M,
+                 9*M + S + 6*A,
+                 5*S + 7*A),
+}

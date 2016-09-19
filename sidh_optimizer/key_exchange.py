@@ -13,6 +13,6 @@ def opcount(n, costs, weights=None):
         w = (costs.mul.weigh(**weights), costs.isogeny.weigh(**weights))
     cost, path = optimal_paths(n, *w)[-1]
     l, r =  path.count()
-    total = l*costs.mul + r*costs.isogeny + (n-1)*costs.next_curve
+    total = l*costs.mul + r*costs.isogeny + n*costs.next_curve
         
     return path, total, cost
