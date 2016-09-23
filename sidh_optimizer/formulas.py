@@ -1,3 +1,5 @@
+# coding=utf-8
+
 # Copyright (c) 2016 Luca De Feo.
 
 from collections import OrderedDict, namedtuple

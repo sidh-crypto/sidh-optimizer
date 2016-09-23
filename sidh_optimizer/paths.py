@@ -1,3 +1,5 @@
+# coding=utf-8
+
 # Copyright (c) 2016 Luca De Feo.
 
 import math
