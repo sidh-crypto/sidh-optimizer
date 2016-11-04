@@ -27,6 +27,12 @@ class Cost():
         assert type(other) == type(self)
         return Cost(other, **self.costs)
 
+    def __neg__(self):
+        return -1*self
+
+    def __sub__(self, other):
+        return self + (-other)
+
     def __mul__(self, scalar):
         assert type(scalar) == int
         return Cost(**{ k:scalar*v for (k,v) in self.costs.items() })
@@ -81,6 +87,9 @@ DJP = {
 # CLN paper (Microsoft)
 
 CLN = {
+    2: Party(double + M,
+                 3*M + S + A,
+                 3*M + S + 3*A),
     3: Party(triple + M,
                  6*M + 2*S + 2*A,
                  3*M + 3*S + 8*A),
