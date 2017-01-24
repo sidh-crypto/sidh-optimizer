@@ -3,6 +3,7 @@
 # Copyright (c) 2016 Luca De Feo.
 
 from collections import OrderedDict, namedtuple
+import sympy
 
 class Cost():
     '''
@@ -97,3 +98,90 @@ CLN = {
                  9*M + S + 6*A,
                  5*S + 7*A),
 }
+
+
+########################
+# Generic formulas
+
+class Formula():
+    def __init__(self, op, children, formula):
+       self.op = op
+       self.children = children
+       self.formula = formula
+
+    def __add__(self, other):
+        if not isinstance(other, Formula):
+            return NotImplemented
+        return Formula('+', [self, other], self.formula + other.formula)
+
+    def __sub__(self, other):
+        if not isinstance(other, Formula):
+            return NotImplemented
+        return Formula('-', [self, other], self.formula - other.formula)
+    
+    def __mul__(self, other):
+        if other is self:
+            return Formula('^2', [self, other], self.formula**2)
+        if isinstance(other, Formula):
+            return Formula('*', [self, other], self.formula * other.formula)
+        elif type(other) == int:
+            if other < 0:
+                return (-other)*self
+            elif other == 0:
+                raise RuntimeError('No no-ops, please')
+            elif other == 1:
+                return self
+            else:
+                val = (self + self)*(other // 2)
+                if other % 2:
+                    val = val + self
+                return val
+        else:
+            return NotImplemented
+
+    __rmul__ = __mul__
+        
+    def __truediv__(self, other):
+        if not isinstance(other, Formula):
+            return NotImplemented
+        return Formula('/', [self, other], self.formula / other.formula)
+
+    def __pow__(self, exp):
+        if not isinstance(exp, int):
+            return NotImplemented
+        if exp <= 0:
+            raise NotImplementedError
+        if exp == 1:
+            return self
+        else:
+            val = (self * self)^(exp // 2)
+            if exp % 2:
+                val = val*self
+            return val
+
+    __xor__ = __pow__
+
+    def __neg__(self):
+        return Formula('u-', [self], -self.formula)
+
+    def __repr__(self):
+        return repr(self.formula)
+
+    def cost(self, costs=None):
+        if costs is None:
+            costs = { '+': A, '-': A, 'u-': Cost(), '*': M, '^2': S, '/': M + I, }
+        return sum((c.cost(costs) for c in self.children), costs[self.op])
+
+
+class Var(Formula):
+    def __init__(self, name, comment=''):
+        self.formula = sympy.symbols(name)
+        self.comment = comment
+
+    def cost(self, costs=None):
+        return Cost()
+
+        
+X = Var('X')
+Y = Var('Y')
+Z = Var('Z')

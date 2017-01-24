@@ -17,5 +17,5 @@ setup(
     ],
     keywords='cryptography isogeny',
     packages=find_packages(),
-    install_requires=['pillow'],
+    install_requires=['pillow', 'sympy'],
 )
