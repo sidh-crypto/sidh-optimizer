@@ -171,6 +171,9 @@ class Formula():
     def __repr__(self):
         return repr(self.formula)
 
+    def _repr_latex_(self):
+        return sympy.latex(self.formula)
+
     def cost(self, costs=None, tag=None):
         if costs is None:
             costs = { '+': Cost(A=1), '-': Cost(A=1), 'u-': Cost(),
@@ -250,7 +253,10 @@ def ed_add(X1, Y1, Z1, X2, Y2, Z2, D, E):
     g = eb + e
     return ea*f*((X1 + Y1)*(X2 + Y2) - c - d), ea*g*(d-c), f*g
 
-def edwards(ell, D, E, KX, KY, KZ, X, Y, Z):
+def edwards(ell, D=Var('D'), E=Var('E'),
+                KX=Var('α'), KY=Var('β'), KZ=Var('γ'),
+                X=Var('X'), Y=Var('Y'), Z=Var('Z'),
+                nameA='A', nameB='B', nameD='D'):
     '''
     Compute generic formula for isogenies of Edwards curves of
     degree ell.
@@ -288,20 +294,15 @@ def edwards(ell, D, E, KX, KY, KZ, X, Y, Z):
     # named α, β, γ
     x, y, z = X, Y, Z
     X2, Y2, Z2 = X^2, Y^2, Z^2
-    Z4 = Z2^2
-    X2Y2 = X2 + Y2 - Z4
-    sub = lambda n: ''.join(chr(ord(c)+ord('₀')-ord('0')) for c in str(n))
+    X2Y2 = X2 + Y2 - Z2
     for i, _ in enumerate(constants):
-        a = c = Var('β' + sub(i))
-        b = Var('α' + sub(i))
-        d = Var('γ' + sub(i))
+        a = c = Var(nameA + str(i))
+        b = Var(nameB + str(i))
+        d = Var(nameD + str(i))
         e, f, g = (a - b)*(X2 + Y2), a*X2, b*Y2
         x *= f - g
         y *= e - f + g
-        z *= c*Z4 - d*X2Y2
-    Z2S = Z2^(ell // 2)
-    x *= Z2S
-    y *= Z2S
+        z *= c*Z2 - d*X2Y2
 
     return (D4**2 * D**ell, E4**2 * E**ell), constants, (x, y, z)
 
