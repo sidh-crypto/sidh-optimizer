@@ -179,9 +179,10 @@ class Formula():
         # Soooo hacky!
         if tag is None:
             tag = uuid.uuid4()
-        cost = (self._tag != tag)*costs[self.op]
+        if self._tag == tag:
+            return Cost()
         self._tag = tag
-        return sum((c.cost(costs, tag) for c in self.children), cost)
+        return sum((c.cost(costs, tag) for c in self.children), costs[self.op])
 
 
 class Var(Formula):
